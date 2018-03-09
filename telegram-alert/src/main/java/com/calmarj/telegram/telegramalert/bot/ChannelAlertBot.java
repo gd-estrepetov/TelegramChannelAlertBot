@@ -1,32 +1,31 @@
 package com.calmarj.telegram.telegramalert.bot;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
-@Component
-public class ChannelAlertBot extends TelegramLongPollingBot{
+public class ChannelAlertBot extends TelegramLongPollingBot {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChannelAlertBot.class);
 
     private final String botToken;
 
-    public ChannelAlertBot(@Value("${bot.token}") String botToken) {
+    public ChannelAlertBot(String botToken) {
         this.botToken = botToken;
     }
 
     @Override
     public void onUpdateReceived(Update update) {
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
-                    .setChatId(update.getMessage().getChatId())
-                    .setText(update.getMessage().getText());
-            try {
-                execute(message); // Call method to send the message
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-            }
+        SendMessage message = new SendMessage()
+                .setChatId(update.getMessage().getChatId())
+                .setText(update.getMessage().getText());
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            LOGGER.error("Error happened during sending message", e);
         }
     }
 
